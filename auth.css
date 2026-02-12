@@ -66,7 +66,8 @@ body {
     border-radius: 12px;
 }
 
-.tab-btn {
+.tab-btn,
+.auth-tab {
     flex: 1;
     padding: 10px;
     border: none;
@@ -76,12 +77,36 @@ body {
     cursor: pointer;
     font-weight: 600;
     transition: 0.3s;
+    text-align: center;
 }
 
-.tab-btn.active {
+.tab-btn.active,
+.auth-tab.active {
     background: var(--primary-purple);
     color: white;
     box-shadow: var(--shadow-glow);
+}
+
+/* Form Visibility Logic */
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .form-group {
@@ -96,7 +121,8 @@ body {
     font-size: 0.9rem;
 }
 
-input {
+input,
+select {
     width: 100%;
     padding: 12px 15px;
     background: rgba(0, 0, 0, 0.3);
@@ -104,15 +130,19 @@ input {
     border-radius: 12px;
     color: white;
     margin-bottom: 10px;
+    box-sizing: border-box;
+    /* Fix width overflow */
 }
 
-input:focus {
+input:focus,
+select:focus {
     outline: none;
     border-color: var(--primary-purple);
     box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
 }
 
-.btn {
+.btn,
+.auth-btn {
     width: 100%;
     padding: 14px;
     border: none;
@@ -124,9 +154,11 @@ input:focus {
     cursor: pointer;
     transition: 0.3s;
     box-shadow: var(--shadow-glow);
+    margin-top: 10px;
 }
 
-.btn:hover {
+.btn:hover,
+.auth-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(139, 92, 246, 0.4);
 }
@@ -143,6 +175,14 @@ input:focus {
 
 .error {
     color: #f87171;
+}
+
+.auth-message {
+    display: none;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
 }
 
 .auth-message.show {
@@ -167,12 +207,15 @@ input:focus {
 }
 
 .back-link a {
-    color: var(--primary-purple);
+    color: var(--text-secondary);
+    /* Better contrast */
     text-decoration: none;
     font-weight: 500;
+    transition: color 0.3s;
 }
 
 .back-link a:hover {
-    text-decoration: underline;
+    color: var(--primary-purple);
+    text-decoration: none;
     text-shadow: var(--shadow-glow);
 }
