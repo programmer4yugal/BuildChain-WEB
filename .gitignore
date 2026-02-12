@@ -1,0 +1,13 @@
+# Environment Variables (Secrets)
+env.js
+
+# Dependencies
+node_modules/
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Editor Files
+.vscode/
+.idea/

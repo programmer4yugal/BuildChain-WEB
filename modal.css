@@ -1,0 +1,96 @@
+/* Verification Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #2b1a12 0%, #1c120d 100%);
+    margin: 50px auto 0 auto;
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(198, 164, 138, 0.15);
+}
+
+.modal-close {
+    color: #94a3b8;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: #fff;
+}
+
+.modal-content h2 {
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.modal-content .success-icon {
+    color: #10b981;
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-content .error-icon {
+    color: #ef4444;
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-content .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 10px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.modal-content .tampered-block {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 3px solid #ef4444;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+
+.modal-content .tampered-block h4 {
+    color: #ef4444;
+    margin-bottom: 10px;
+}
+
+.modal-content code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #60a5fa;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

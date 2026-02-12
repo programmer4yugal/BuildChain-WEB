@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuildChain - Login/Register</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="auth-container">
+    <div class="auth-box">
+      <h2><i class="fas fa-hammer"></i> BuildChain</h2>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchTab('login')">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </div>
+        <div class="auth-tab" onclick="switchTab('register')">
+          <i class="fas fa-user-plus"></i> Register
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form active">
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="loginEmail" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="auth-btn">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" class="auth-form">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Full Name</label>
+          <input type="text" id="registerName" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="registerEmail" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="registerPassword" placeholder="Create a password (min 6 characters)" required
+            minlength="6">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-user-tag"></i> Role</label>
+          <select id="registerRole" required>
+            <option value="">Select your role</option>
+            <option value="admin">Admin</option>
+            <option value="contractor">Contractor</option>
+
+            <option value="public">Public Viewer</option>
+          </select>
+        </div>
+        <button type="submit" class="auth-btn">
+          <i class="fas fa-user-plus"></i> Register
+        </button>
+      </form>
+
+      <div id="authMessage" class="auth-message"></div>
+
+      <div class="back-link">
+        <a href="index.html"><i class="fas fa-arrow-left"></i> Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="env.js"></script>
+  <script src="firebase.js"></script>
+  <script src="authentication.js"></script>
+</body>
+
+</html>

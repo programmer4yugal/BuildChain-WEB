@@ -1,0 +1,141 @@
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Soft mesh gradient background */
+    background: radial-gradient(circle at top left, #f97316, transparent 40%),
+        radial-gradient(circle at bottom right, #db2777, transparent 40%),
+        #f3f4f6;
+    padding: 20px;
+}
+
+.auth-box {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 450px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.auth-box h2 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-size: 2rem;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.auth-tab.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--dark-color);
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.auth-btn:hover {
+    background: var(--secondary-color);
+}
+
+.auth-message {
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    display: none;
+}
+
+.auth-message.show {
+    display: block;
+}
+
+.auth-message.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.auth-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.back-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
