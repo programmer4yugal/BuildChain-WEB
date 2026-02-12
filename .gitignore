@@ -1,13 +1,3 @@
 # Environment Variables (Secrets)
-env.js
-
-# Dependencies
-node_modules/
-
-# OS Generated Files
-.DS_Store
-Thumbs.db
-
-# Editor Files
-.vscode/
-.idea/
+# env.js is required for client-side deployment.
+# Note: Ensure your Firebase Security Rules are secure as these keys will be public.
