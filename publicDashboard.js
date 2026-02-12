@@ -12,39 +12,25 @@ window.filterTransactions = (type) => {
 
 // Public - Load Public Data
 const loadPublicData = async () => {
-  // if (!contract) return; // Public data should be visible without wallet
-
   const container = document.getElementById('publicTransactions');
   if (container) {
     container.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Loading blockchain data from Firebase...</div>';
   }
 
   try {
-    console.log("Fetching projects...");
     const projects = await getCollectionData('projects');
-    console.log(`Fetched ${projects.length} projects`);
-
-    console.log("Fetching milestones...");
     const milestones = await getCollectionData('milestones');
-
-    console.log("Fetching materials...");
     const materials = await getCollectionData('materials');
-
-    console.log("Fetching attendance...");
     const attendance = await getCollectionData('attendance');
-
-    console.log("Fetching labor registry...");
     const laborRegistry = await getCollectionData('labor_registry');
 
     document.getElementById('totalProjects').textContent = projects.length;
     document.getElementById('totalMilestones').textContent = milestones.length;
     document.getElementById('totalMaterials').textContent = materials.length;
     document.getElementById('totalAttendance').textContent = attendance.length;
-    // You might want to add a counter for Total Labor too if the UI supports it, otherwise just display the transactions
 
     // Combine all into a single timeline array
-
-    const formattedProjects = projects.map(p => ({ ...p, type: 'projects', description: `Budget: ${p.budget} ETH`, hash: p.txHash || p.hash || '' }));
+    const formattedProjects = projects.map(p => ({ ...p, type: 'projects', description: `Budget: ${p.budget} ₹`, hash: p.txHash || p.hash || '' }));
     const formattedMilestones = milestones.map(m => ({
       ...m,
       type: 'milestones',
@@ -64,7 +50,6 @@ const loadPublicData = async () => {
       ...formattedLabor
     ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    console.log(`Displaying ${allTransactions.length} transactions`);
     displayTransactions(allTransactions);
   } catch (error) {
     console.error('Error loading public data:', error);
@@ -89,23 +74,25 @@ const displayTransactions = (transactions) => {
 
   container.innerHTML = transactions.map(tx => `
     <div class="transaction-item">
-      <div class="transaction-info">
+      <div class="transaction-header">
         <h4><i class="fas fa-${getIconForType(tx.type)}"></i> ${tx.title}</h4>
-        <p>${tx.description}</p>
-        <p><strong>From:</strong> ${tx.from || 'System'}</p>
-        <p><strong>Date:</strong> ${new Date(tx.timestamp).toLocaleString()}</p>
-        <p style="margin-top: 10px; padding: 8px; background: rgba(124, 58, 237, 0.1); border-radius: 6px; font-size: 0.85em;">
-          <strong><i class="fas fa-link"></i> Chain Link:</strong><br>
-          <span style="color: #64748b;">Previous: </span>
-          <code style="font-size: 0.9em; color: #7c3aed;">${tx.previousHash ? tx.previousHash.substring(0, 16) + '...' : 'Genesis'}</code><br>
-          <span style="color: #64748b;">Current: </span>
-          <code style="font-size: 0.9em; color: #3b82f6;">${tx.hash ? tx.hash.substring(0, 16) + '...' : 'N/A'}</code>
-        </p>
+        <span class="transaction-time"><i class="far fa-clock"></i> ${new Date(tx.timestamp).toLocaleString()}</span>
       </div>
-      <div class="transaction-meta">
-        <span class="transaction-hash" title="Transaction Hash">
-          <i class="fas fa-fingerprint"></i> ${tx.hash ? tx.hash.substring(0, 12) + '...' : 'N/A'}
-        </span>
+      
+      <div class="transaction-body">
+        <p class="transaction-desc">${tx.description}</p>
+        <p class="transaction-from"><strong>From:</strong> ${tx.from || 'System'}</p>
+      </div>
+
+      <div class="chain-link-box">
+        <div class="chain-row">
+          <span class="hash-label">Previous:</span>
+          <code class="hash-value prev">${tx.previousHash ? tx.previousHash.substring(0, 20) + '...' : 'Genesis'}</code>
+        </div>
+        <div class="chain-row">
+          <span class="hash-label">Current:</span>
+          <code class="hash-value curr">${tx.hash ? tx.hash.substring(0, 20) + '...' : 'N/A'}</code>
+        </div>
       </div>
     </div>
   `).join('');
@@ -128,103 +115,103 @@ if (document.getElementById('public')) {
   loadPublicData();
 }
 
-// Verify Chain Integrity Function (Global)
+// Verify Chain Integrity Function (Global Ledger)
 window.verifyChainIntegrity = async () => {
   try {
-    showStatus("🔍 Verifying blockchain integrity...", "info");
+    showStatus("🔍 Verifying Global Ledger...", "info");
 
-    const collections = ['projects', 'milestones', 'materials', 'labor_registry', 'attendance'];
     let totalBlocks = 0;
     let tamperedBlocks = [];
     let chainBreaks = [];
 
-    for (const collectionName of collections) {
-      const snapshot = await db.collection(collectionName)
-        .orderBy('timestamp', 'asc')
-        .get();
+    // Fetch the Canonical Global Chain
+    const snapshot = await db.collection('global_ledger')
+      .orderBy('timestamp', 'asc')
+      .get();
 
-      const blocks = [];
-      snapshot.forEach(doc => {
-        blocks.push({ id: doc.id, ...doc.data() });
-      });
+    const blocks = [];
+    snapshot.forEach(doc => {
+      blocks.push({ id: doc.id, ...doc.data() });
+    });
 
-      // Verify each block
-      for (let i = 0; i < blocks.length; i++) {
-        const block = blocks[i];
-        totalBlocks++;
+    // Verify each block in the global chain
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      totalBlocks++;
 
-        if (!block.hash) continue;
+      if (!block.hash) continue;
 
-        // Expected previousHash
-        const expectedPreviousHash = i === 0
-          ? "0x0000000000000000000000000000000000000000"
-          : blocks[i - 1].hash;
+      // Expected previousHash
+      const expectedPreviousHash = i === 0
+        ? "0x0000000000000000000000000000000000000000"
+        : blocks[i - 1].hash;
 
-        // Re-calculate hash (exclude metadata fields)
-        const { hash, previousHash, id, blockNumber, timestamp, ...data } = block;
-        const recalculatedHash = await generateHash(data, expectedPreviousHash, timestamp); // Use original timestamp!
+      // Re-calculate hash
+      // logic: extract hash/prevHash/meta, leave the data that was hashed
+      const { hash, previousHash, id, blockNumber, timestamp, ...data } = block;
 
-        // Check for tampering
-        if (block.hash !== recalculatedHash) {
-          tamperedBlocks.push({
-            collection: collectionName,
-            blockId: block.id,
-            blockNumber: i + 1,
-            storedHash: block.hash.substring(0, 16) + '...',
-            expectedHash: recalculatedHash.substring(0, 16) + '...',
-            data: block.title || block.description || 'Unknown'
-          });
-        }
+      // 'data' here contains 'type' and all business fields, exactly as hashed in addBlockToChain
+      const recalculatedHash = await generateHash(data, expectedPreviousHash, timestamp);
 
-        // Check for chain breaks
-        if (block.previousHash !== expectedPreviousHash) {
-          chainBreaks.push({
-            collection: collectionName,
-            blockId: block.id,
-            blockNumber: i + 1,
-            storedPrevHash: block.previousHash.substring(0, 16) + '...',
-            expectedPrevHash: expectedPreviousHash.substring(0, 16) + '...'
-          });
-        }
+      // Check for tampering
+      if (block.hash !== recalculatedHash) {
+        tamperedBlocks.push({
+          collection: 'global_ledger',
+          blockId: block.id,
+          blockNumber: block.blockNumber || (i + 1),
+          startHash: block.hash.substring(0, 16) + '...',
+          calcHash: recalculatedHash.substring(0, 16) + '...',
+          // Try to show meaningful info
+          info: block.title || block.description || block.type || 'Unknown Data'
+        });
+      }
+
+      // Check for chain breaks
+      if (block.previousHash !== expectedPreviousHash) {
+        chainBreaks.push({
+          collection: 'global_ledger',
+          blockId: block.id,
+          blockNumber: block.blockNumber || (i + 1),
+          storedPrev: block.previousHash.substring(0, 16) + '...',
+          expectPrev: expectedPreviousHash.substring(0, 16) + '...'
+        });
       }
     }
 
     // Display results
     if (tamperedBlocks.length === 0 && chainBreaks.length === 0) {
-      showStatus(`✅ Chain Verified! All ${totalBlocks} blocks are intact.`, "success");
+      showStatus(`✅ Global Ledger Verified! All ${totalBlocks} blocks are secure.`, "success");
 
       showVerificationModal(
-        '🔒 Blockchain Integrity Verified',
+        '🔒 Global Ledger Verified',
         `
         <div class="success-icon">✅</div>
-        <div class="stat-row"><span>Total Blocks:</span><strong>${totalBlocks}</strong></div>
+        <div class="stat-row"><span>Total Global Blocks:</span><strong>${totalBlocks}</strong></div>
         <div class="stat-row"><span>Tampered Blocks:</span><strong style="color: #10b981;">0</strong></div>
         <div class="stat-row"><span>Chain Breaks:</span><strong style="color: #10b981;">0</strong></div>
         <p style="text-align: center; margin-top: 20px; color: #10b981;">
-          All hashes match! Chain is unbroken!
+          Unified Chain is unbroken and immutable!
         </p>
         `
       );
     } else {
-      showStatus(`❌ TAMPERING DETECTED! ${tamperedBlocks.length + chainBreaks.length} issues found.`, "error");
+      showStatus(`❌ LEDGER COMPROMISED! ${tamperedBlocks.length + chainBreaks.length} issues found.`, "error");
 
       let bodyHTML = `
         <div class="error-icon">⚠️</div>
         <div class="stat-row"><span>Total Blocks:</span><strong>${totalBlocks}</strong></div>
-        <div class="stat-row"><span>Tampered Blocks:</span><strong style="color: #ef4444;">${tamperedBlocks.length}</strong></div>
-        <div class="stat-row"><span>Chain Breaks:</span><strong style="color: #ef4444;">${chainBreaks.length}</strong></div>
+        <div class="stat-row"><span>Tampering:</span><strong style="color: #ef4444;">${tamperedBlocks.length}</strong></div>
+        <div class="stat-row"><span>Breaks:</span><strong style="color: #ef4444;">${chainBreaks.length}</strong></div>
       `;
 
       if (tamperedBlocks.length > 0) {
-        bodyHTML += `<h3 style="color: #ef4444; margin-top: 20px;">Tampered Blocks</h3>`;
+        bodyHTML += `<h3 style="color: #ef4444; margin-top: 20px;">Tampered Data</h3>`;
         tamperedBlocks.forEach((t, idx) => {
           bodyHTML += `
             <div class="tampered-block">
-              <h4>${idx + 1}. ${t.collection.toUpperCase()} - Block #${t.blockNumber}</h4>
-              <p><strong>ID:</strong> <code>${t.blockId}</code></p>
-              <p><strong>Data:</strong> ${t.data}</p>
-              <p><strong>Stored Hash:</strong> <code>${t.storedHash}</code></p>
-              <p><strong>Expected Hash:</strong> <code>${t.expectedHash}</code></p>
+              <h4>Block #${t.blockNumber} (${t.info})</h4>
+              <p><strong>Stored:</strong> <code>${t.startHash}</code></p>
+              <p><strong>Calculated:</strong> <code>${t.calcHash}</code></p>
             </div>
           `;
         });
@@ -235,14 +222,15 @@ window.verifyChainIntegrity = async () => {
         chainBreaks.forEach((c, idx) => {
           bodyHTML += `
             <div class="tampered-block">
-              <h4>${idx + 1}. ${c.collection.toUpperCase()} - Block #${c.blockNumber}</h4>
-              <p>previousHash doesn't link to previous block!</p>
+              <h4>Block #${c.blockNumber} (Link Broken)</h4>
+              <p><strong>Stored Prev:</strong> <code>${c.storedPrev}</code></p>
+              <p><strong>Actual Prev:</strong> <code>${c.expectPrev}</code></p>
             </div>
           `;
         });
       }
 
-      showVerificationModal('⚠️ Blockchain Integrity Compromised', bodyHTML);
+      showVerificationModal('⚠️ Global Ledger Compromised', bodyHTML);
     }
 
   } catch (error) {
@@ -255,7 +243,8 @@ window.verifyChainIntegrity = async () => {
 function showVerificationModal(title, bodyHTML) {
   document.getElementById('verificationTitle').textContent = title;
   document.getElementById('verificationBody').innerHTML = bodyHTML;
-  document.getElementById('verificationModal').style.display = 'block';
+  const modal = document.getElementById('verificationModal');
+  modal.style.display = 'flex'; // Use Flex for centering
 }
 
 // Close verification modal

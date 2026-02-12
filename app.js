@@ -1,22 +1,8 @@
 // Core Application - Navigation & Status
 // Firebase-only version (No MetaMask/Blockchain)
 
-// Global DEBUG Function for Firebase
-window.testFirebaseConnection = async () => {
-  try {
-    const testData = {
-      timestamp: new Date().toISOString(),
-      status: "Connection Working",
-      userAgent: navigator.userAgent
-    };
-    console.log("Testing Firebase write...", testData);
-    await db.collection("test_debug").add(testData);
-    alert("SUCCESS: Database connection is working!\\n\\nCheck the 'test_debug' collection in Firebase Console.");
-  } catch (e) {
-    console.error("Firebase Test Failed:", e);
-    alert("FAILURE: Could not write to Firebase.\\n\\nError: " + e.message + "\\n\\nCHECK YOUR RULES in Firebase Console!");
-  }
-};
+// Core Application - Navigation & Status
+// Firebase-only version (No MetaMask/Blockchain)
 
 // Global Navigation Functions
 window.showSection = (sectionId) => {

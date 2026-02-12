@@ -40,7 +40,8 @@ document.getElementById("createProjectForm")?.addEventListener("submit", async (
 const loadAdminData = async () => {
   try {
     const projects = await getCollectionData('projects');
-    const milestones = await getCollectionData('milestones');
+    const milestoneSubmissions = await getCollectionData('milestone_submissions');
+    const approvedMilestones = await getCollectionData('milestones');
 
     const projectsList = document.getElementById('adminProjectsList');
     const pendingMilestones = document.getElementById('pendingMilestones');
@@ -52,7 +53,7 @@ const loadAdminData = async () => {
           <div class="project-item">
             <h4>${project.title}</h4>
             <p><strong>Location:</strong> ${project.location}</p>
-            <p><strong>Budget:</strong> ${project.budget} ETH</p>
+            <p><strong>Budget:</strong> ${project.budget} ₹</p>
             <p><strong>Contractor:</strong> ${project.contractor}</p>
             <p><strong>Hash:</strong> <span class="transaction-hash">${project.hash?.substring(0, 16)}...</span></p>
           </div>
@@ -66,17 +67,17 @@ const loadAdminData = async () => {
 
     if (pendingMilestones) {
       pendingMilestones.innerHTML = '';
-      const pending = milestones.filter(m => m.status === 'pending');
+      const pending = milestoneSubmissions.filter(m => m.status === 'pending_approval');
 
       pending.forEach(milestone => {
         pendingMilestones.innerHTML += `
           <div class="milestone-item">
-            <h4>Project ID: ${milestone.projectId}</h4>
-            <p><strong>Description:</strong> ${milestone.description}</p>
-            <p><strong>Proof:</strong> ${milestone.proofHash}</p>
+            <h4>${milestone.description}</h4>
             <p><strong>Submitted by:</strong> ${milestone.from}</p>
+            <p><strong>Project ID:</strong> ${milestone.projectId}</p>
+            <p><strong>Proof:</strong> <code class="hash-preview">${milestone.proofHash}</code></p>
             <button class="btn primary" onclick="approveMilestone('${milestone.id}')">
-              <i class="fas fa-check"></i> Approve
+              <i class="fas fa-check"></i> Approve & Chain
             </button>
           </div>
         `;
@@ -88,7 +89,7 @@ const loadAdminData = async () => {
     }
 
     // Create analytics chart
-    createAdminChart(projects, milestones);
+    createAdminChart(projects, approvedMilestones);
   } catch (error) {
     console.error('Error loading admin data:', error);
   }
@@ -165,18 +166,47 @@ function createAdminChart(projects, milestones) {
 }
 
 // Approve Milestone Function (Global so onclick can access it)
-window.approveMilestone = async (milestoneId) => {
+window.approveMilestone = async (submissionId) => {
   try {
-    showStatus("Approving milestone...", "info");
+    showStatus("Approving and adding to blockchain...", "info");
 
-    // Update the milestone document in Firestore
-    await db.collection('milestones').doc(milestoneId).update({
+    const adminEmail = sessionStorage.getItem('userEmail') || 'Admin';
+
+    // 1. Get the submission data
+    const docRef = db.collection('milestone_submissions').doc(submissionId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      throw new Error("Submission not found");
+    }
+
+    const submission = doc.data();
+
+    // 2. Prepare Block Data
+    // We preserve the original submission time as 'submittedAt'
+    const { timestamp, ...rest } = submission;
+
+    const blockData = {
+      ...rest,
+      submittedAt: timestamp, // Original submission time
+      approvedBy: adminEmail,
+      approvedAt: new Date().toISOString(),
+      status: 'approved'
+    };
+
+    // 3. Add to REAL Blockchain (Global + Milestones)
+    const newBlock = await addBlockToChain("milestones", blockData);
+
+    // 4. Update the Submission Buffer to link to the Chain
+    await docRef.update({
       status: 'approved',
-      approvedBy: sessionStorage.getItem('userEmail') || 'Admin',
-      approvedAt: new Date().toISOString()
+      approvedBy: adminEmail,
+      approvedAt: blockData.approvedAt,
+      txHash: newBlock.hash, // Link to the blockchain block
+      blockNumber: newBlock.blockNumber
     });
 
-    showStatus("Milestone approved successfully!", "success");
+    showStatus("Milestone approved and chained successfully!", "success");
     loadAdminData(); // Refresh the pending list
 
     if (typeof loadPublicData === 'function') {
@@ -188,7 +218,52 @@ window.approveMilestone = async (milestoneId) => {
   }
 };
 
+// Admin - Set Milestone Form Handler
+document.getElementById("setMilestoneForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  try {
+    const projectId = document.getElementById("setMilestoneProjectId").value;
+    const title = document.getElementById("setMilestoneTitle").value;
+    const description = document.getElementById("setMilestoneDesc").value;
+    const amount = document.getElementById("setMilestoneAmount").value;
+
+    if (!projectId) {
+      showStatus("Please select a project", "error");
+      return;
+    }
+
+    showStatus("Setting milestone on blockchain...", "info");
+
+    const milestoneData = {
+      projectId,
+      title,
+      description,
+      amount,
+      status: 'defined',
+      createdAt: new Date().toISOString(),
+      from: sessionStorage.getItem('userEmail') || 'Admin'
+    };
+
+    // Add to 'defined_milestones' chain (and Global Ledger via new addBlockToChain)
+    await addBlockToChain("defined_milestones", milestoneData);
+
+    showStatus("Milestone set successfully!", "success");
+    document.getElementById("setMilestoneForm").reset();
+
+    // Refresh data
+    loadAdminData();
+  } catch (error) {
+    console.error('Set milestone error:', error);
+    showStatus(`Error: ${error.message}`, "error");
+  }
+});
+
 // Initialize on page load
 if (document.getElementById('admin')) {
   loadAdminData();
+  // Populate the dropdown for Set Milestone
+  if (typeof populateProjectSelectors === 'function') {
+    populateProjectSelectors();
+  }
 }

@@ -6,33 +6,86 @@ document.getElementById("submitMilestoneForm")?.addEventListener("submit", async
 
   try {
     const projectId = document.getElementById("milestoneProjectId").value;
-    const description = document.getElementById("milestoneDesc").value;
+    const milestoneSelect = document.getElementById("milestoneId");
+    const definedMilestoneId = milestoneSelect.value;
     const proofHash = document.getElementById("proofHash").value;
 
-    showStatus("Submitting milestone to blockchain...", "info");
+    if (!definedMilestoneId) {
+      showStatus("Please select a milestone", "error");
+      return;
+    }
 
-    const milestoneData = {
+    // Get the title from the selected option text
+    // Format: "Title (Amount ₹)" -> Just get Title? Or keep as is. 
+    // The previous code used the full text. I'll keep it simple.
+    const milestoneTitle = milestoneSelect.options[milestoneSelect.selectedIndex].text.split(' (')[0];
+
+    showStatus("Submitting milestone for approval...", "info");
+
+    const submissionData = {
       projectId: parseInt(projectId),
-      description,
+      definedMilestoneId,
+      description: milestoneTitle,
       proofHash,
-      status: 'pending',
+      status: 'pending_approval',
+      timestamp: new Date().toISOString(),
       from: sessionStorage.getItem('userEmail') || 'Contractor'
     };
 
-    await addBlockToChain("milestones", milestoneData);
+    // Save to off-chain buffer for approval
+    await db.collection('milestone_submissions').add(submissionData);
 
-    showStatus("Milestone submitted successfully!", "success");
+    showStatus("Milestone submitted for approval!", "success");
     document.getElementById("submitMilestoneForm").reset();
 
-    loadContractorData();
-    if (typeof loadPublicData === 'function') {
-      loadPublicData();
-    }
+    // Refresh my milestones
+    loadContractorMilestones();
+    // No need to loadPublicData immediately as it's not on chain yet
   } catch (error) {
     console.error('Submit milestone error:', error);
     showStatus(`Error: ${error.message}`, "error");
   }
 });
+
+// Event Listener: When Milestone Project changes, load defined milestones
+document.getElementById("milestoneProjectId")?.addEventListener("change", (e) => {
+  if (e.target.value) {
+    populateDefinedMilestones(e.target.value);
+  } else {
+    document.getElementById("milestoneId").innerHTML = '<option value="">Select Milestone to Submit</option>';
+  }
+});
+
+// Helper: Populate Defined Milestones Dropdown
+async function populateDefinedMilestones(projectId) {
+  const select = document.getElementById("milestoneId");
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Loading milestones...</option>';
+
+  try {
+    // Fetch defined milestones from the dual-written collection
+    const defined = await getCollectionData('defined_milestones');
+
+    // Filter by project and status (if applicable)
+    // Assuming defined_milestones store projectId as string or number matching selection
+    const projectMilestones = defined.filter(m => m.projectId.toString() === projectId.toString());
+
+    select.innerHTML = '<option value="">Select Milestone to Submit</option>';
+
+    projectMilestones.forEach(m => {
+      // Show Title and Amount
+      select.innerHTML += `<option value="${m.id || m.hash}">${m.title} (${m.amount} ₹)</option>`;
+    });
+
+    if (projectMilestones.length === 0) {
+      select.innerHTML += '<option value="" disabled>No milestones defined for this project</option>';
+    }
+  } catch (error) {
+    console.error("Error loading defined milestones:", error);
+    select.innerHTML = '<option value="">Error loading milestones</option>';
+  }
+}
 
 // Contractor - Log Material Form Handler
 document.getElementById("logMaterialForm")?.addEventListener("submit", async (e) => {
@@ -188,7 +241,7 @@ const loadContractorData = async () => {
         contractorProjects.innerHTML += `
           <div class="project-item">
             <h4>Project: ${project.title}</h4>
-            <p><strong>Budget:</strong> ${project.budget} ETH</p>
+            <p><strong>Budget:</strong> ${project.budget} ₹</p>
             <p><strong>Status:</strong> <span class="status-badge pending">In Progress</span></p>
           </div>
         `;
@@ -202,8 +255,56 @@ const loadContractorData = async () => {
     // Load Labor Data
     loadLaborRegistry();
     loadAttendanceRecords();
+    loadContractorMilestones();
   } catch (error) {
     console.error('Error loading contractor data:', error);
+  }
+};
+
+// Load Contractor Milestones
+const loadContractorMilestones = async () => {
+  try {
+    // Fetch from submissions buffer
+    const milestones = await getCollectionData('milestone_submissions');
+    const container = document.getElementById('contractorMilestones');
+    const userEmail = sessionStorage.getItem('userEmail') || 'Contractor';
+
+    if (container) {
+      container.innerHTML = '';
+      // Filter by current user
+      const myMilestones = milestones.filter(m => m.from === userEmail);
+
+      // Sort: Pending first, then Approved
+      myMilestones.sort((a, b) => {
+        if (a.status === 'pending_approval') return -1;
+        return 1;
+      });
+
+      myMilestones.forEach(m => {
+        let statusClass = 'pending';
+        let statusText = 'Pending Approval';
+        if (m.status === 'approved') {
+          statusClass = 'success'; // or approved
+          statusText = 'Approved (On Chain)';
+        }
+
+        container.innerHTML += `
+          <div class="milestone-card">
+            <h4>${m.description}</h4>
+            <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${statusText}</span></p>
+            <p><strong>Project ID:</strong> ${m.projectId}</p>
+            <p><strong>Proof:</strong> <code class="hash-preview">${m.proofHash}</code></p>
+            ${m.txHash ? `<p><strong>Tx:</strong> <span class="transaction-hash">${m.txHash.substring(0, 10)}...</span></p>` : ''}
+          </div>
+        `;
+      });
+
+      if (myMilestones.length === 0) {
+        container.innerHTML = '<p>No submitted milestones found.</p>';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading contractor milestones:', error);
   }
 };
 

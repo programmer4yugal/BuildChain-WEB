@@ -2,39 +2,56 @@
 
 // --- Blockchain Simulation Functions ---
 
+// Global constant for the main chain
+const GLOBAL_CHAIN = 'global_ledger';
+
 async function addBlockToChain(collectionName, data) {
   try {
-    // 1. Get the last block (document) from this collection
-    const snapshot = await db.collection(collectionName)
+    // 1. Get the last block from the GLOBAL LEDGER (Canonical Chain)
+    const snapshot = await db.collection(GLOBAL_CHAIN)
       .orderBy('timestamp', 'desc')
       .limit(1)
       .get();
 
     let previousHash = "0x0000000000000000000000000000000000000000"; // Genesis Hash
+    let previousBlockNumber = 0;
 
     if (!snapshot.empty) {
       previousHash = snapshot.docs[0].data().hash || previousHash;
+      previousBlockNumber = snapshot.docs[0].data().blockNumber || 0;
     }
 
-    // 2. Create timestamp FIRST (critical!)
+    // 2. Create timestamp FIRST
     const timestamp = new Date().toISOString();
 
-    // 3. Generate new Hash linked to previous one (with timestamp)
-    const hash = await generateHash(data, previousHash, timestamp);
-
-    // 4. Prepare the "Block" to save
-    const blockData = {
+    // 3. Prepare data for hashing (Include type/collection)
+    // We add collectionName to the hash data to ensure uniqueness across types
+    const dataToHash = {
       ...data,
-      hash: hash,
-      previousHash: previousHash,
-      timestamp: timestamp, // Use the SAME timestamp that was used in hash
-      blockNumber: snapshot.empty ? 1 : (snapshot.docs[0].data().blockNumber || 0) + 1
+      type: collectionName
     };
 
-    // 5. Save to Firebase
+    // 4. Generate new Hash linked to previous one
+    const hash = await generateHash(dataToHash, previousHash, timestamp);
+
+    // 5. Prepare the "Global Block" to save
+    const blockData = {
+      ...data,
+      type: collectionName, // Metadata for filtering
+      hash: hash,
+      previousHash: previousHash,
+      timestamp: timestamp,
+      blockNumber: previousBlockNumber + 1
+    };
+
+    // 6. Save to GLOBAL LEDGER
+    await db.collection(GLOBAL_CHAIN).add(blockData);
+
+    // 7. Save to Specific Collection (Dual Write for UI queries)
+    // This allows existing dashboards to work without refactoring every query
     await db.collection(collectionName).add(blockData);
 
-    console.log(`Block added to ${collectionName} chain:`, blockData);
+    console.log(`Block added to ${GLOBAL_CHAIN} and ${collectionName}:`, blockData);
     return blockData;
 
   } catch (error) {
@@ -57,7 +74,8 @@ const populateProjectSelectors = async (filterEmail = null) => {
       'milestoneProjectId',
       'materialProjectId',
       'laborProjectId',
-      'attendanceProjectId'
+      'attendanceProjectId',
+      'setMilestoneProjectId'
     ];
 
     selectors.forEach(selectorId => {
