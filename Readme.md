@@ -71,8 +71,8 @@ service cloud.firestore {
 ├── adminDashboard.js     # Admin functions
 ├── contractorDashboard.js # Contractor functions
 ├── publicDashboard.js    # Public view & verification
-├── sharedFunctions.js    # Blockchain utilities
-├── hashing.js            # SHA-256 hash generation
+├── sharedFunctions.js    # UI helper functions
+├── blockchain.js         # Complete blockchain operations (hash, chain, verify)
 └── tabs.js               # Tab switching logic
 ```
 
