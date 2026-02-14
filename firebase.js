@@ -1,12 +1,12 @@
 // Firebase configuration using compat version for non-module usage
 
 const firebaseConfig = (window.env && window.env.firebase) || {
-  apiKey: "MISSING_ENV",
-  authDomain: "MISSING_ENV",
-  projectId: "MISSING_ENV",
-  storageBucket: "MISSING_ENV",
-  messagingSenderId: "MISSING_ENV",
-  appId: "MISSING_ENV"
+  apiKey: "AIzaSyBsjnVF08cgp2VkF27Qg5lKNmR9KkB11kE",
+  authDomain: "buildchain-a0210.firebaseapp.com",
+  projectId: "buildchain-a0210",
+  storageBucket: "buildchain-a0210.firebasestorage.app",
+  messagingSenderId: "900232747950",
+  appId: "1:900232747950:web:9d141dbc90adabfc29463f"
 };
 
 // Initialize Firebase

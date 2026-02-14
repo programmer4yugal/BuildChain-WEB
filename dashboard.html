@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuildChain - Ultra-Modern Construction Management</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="tabs.css">
+
+  <style>
+    /* Ensure Tailwind doesn't conflict with Dashboard Custom CSS */
+    body {
+      background-color: transparent !important;
+    }
+  </style>
+</head>
+
+<body class="text-white overflow-x-hidden relative">
+
+  <!-- ===============================
+       APP CONTAINER (DASHBOARD)
+       =============================== -->
+  <div id="app-container" class="app-container" style="display: flex;">
+
+    <!-- Mobile Toggle -->
+    <input type="checkbox" id="mobile-menu-toggle">
+    <label for="mobile-menu-toggle" class="mobile-toggle-btn">
+      <i class="fas fa-bars"></i>
+    </label>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand-logo">
+        <i class="fas fa-cube"></i>
+        <span>BuildChain</span>
+      </div>
+
+      <nav class="nav-menu">
+        <!-- Admin Menu -->
+        <div id="admin-menu-container" class="nav-item-container">
+          <span class="nav-section-title">Admin</span>
+          <div id="admin-submenu" class="submenu">
+            <a class="submenu-link" onclick="switchTab('admin', 'overview')">
+              <i class="fas fa-chart-line"></i> Overview
+            </a>
+            <a class="submenu-link" onclick="switchTab('admin', 'create-project')">
+              <i class="fas fa-plus"></i> Create Project
+            </a>
+            <a class="submenu-link" onclick="switchTab('admin', 'milestones')">
+              <i class="fas fa-flag"></i> Set Milestones
+            </a>
+            <a class="submenu-link" onclick="switchTab('admin', 'approvals')">
+              <i class="fas fa-check-circle"></i> Approvals
+            </a>
+          </div>
+        </div>
+
+        <!-- Contractor Menu -->
+        <div id="contractor-menu-container" class="nav-item-container">
+          <span class="nav-section-title">Contractor</span>
+          <div id="contractor-submenu" class="submenu">
+            <a class="submenu-link" onclick="switchTab('contractor', 'projects')">
+              <i class="fas fa-folder"></i> My Projects
+            </a>
+            <a class="submenu-link" onclick="switchTab('contractor', 'milestone')">
+              <i class="fas fa-flag"></i> Submit Milestone
+            </a>
+            <a class="submenu-link" onclick="switchTab('contractor', 'material')">
+              <i class="fas fa-truck"></i> Request Material
+            </a>
+            <a class="submenu-link" onclick="switchTab('contractor', 'labor')">
+              <i class="fas fa-users"></i> Register Labor
+            </a>
+            <a class="submenu-link" onclick="switchTab('contractor', 'attendance')">
+              <i class="fas fa-clipboard-check"></i> Mark Attendance
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Auth Wrapper -->
+      <div class="auth-wrapper">
+        <div id="authButtons" style="display: flex; flex-direction: column; gap: 10px;">
+          <a href="auth.html?mode=login" class="btn primary" style="width: 100%; justify-content: center;">
+            <i class="fas fa-sign-in-alt"></i> <span>Login</span>
+          </a>
+        </div>
+        <div id="userInfo" style="display: none;">
+          <div class="user-profile">
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+            <div style="overflow: hidden;">
+              <div id="displayUserName" style="font-weight: 700;">User</div>
+              <div id="displayUserRole" class="status-badge" style="display: inline-block;">Role</div>
+            </div>
+          </div>
+          <button onclick="handleLogout()" class="btn"
+            style="width: 100%; margin-top: 15px; border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- ADMIN SECTION WITH SIDEBAR -->
+      <section id="admin" class="section">
+        <div class="container mx-auto">
+          <div class="section-header flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-white"><i class="fas fa-user-shield mr-2"></i> Admin Dashboard</h2>
+          </div>
+
+
+          <!-- Tab Content: Overview -->
+          <div class="tab-content active" data-section="admin" data-tab="overview">
+            <div class="card full-width mb-6">
+              <h3>All Projects</h3>
+              <div id="adminProjectsList" class="projects-grid"></div>
+            </div>
+            <div class="card full-width mt-6">
+              <h3>Project Analytics</h3>
+              <div style="position: relative; height: 300px;"><canvas id="adminChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Create Project -->
+          <div class="tab-content" data-section="admin" data-tab="create-project">
+            <div class="card full-width">
+              <h3>Create New Project</h3>
+              <form id="createProjectForm">
+                <div class="modern-form-group">
+                  <input type="text" id="projectTitle" class="modern-input" placeholder=" " required>
+                  <label for="projectTitle" class="modern-label">Project Title</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="text" id="projectLocation" class="modern-input" placeholder=" " required>
+                  <label for="projectLocation" class="modern-label">Location</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="number" id="projectBudget" class="modern-input" placeholder=" " step="0.001" required>
+                  <label for="projectBudget" class="modern-label">Total Budget (₹)</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="email" id="contractorAddress" class="modern-input" placeholder=" " required>
+                  <label for="contractorAddress" class="modern-label">Contractor Email</label>
+                </div>
+                <button type="submit" class="btn primary">Create Project</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Tab Content: Set Milestones -->
+          <div class="tab-content" data-section="admin" data-tab="milestones">
+            <div class="card full-width">
+              <h3>Set Project Milestone</h3>
+              <form id="setMilestoneForm">
+                <div class="modern-form-group">
+                  <select id="setMilestoneProjectId" class="modern-input" required>
+                    <option value="" disabled selected>Select Project</option>
+                  </select>
+                  <label for="setMilestoneProjectId" class="modern-label">Select Project</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="text" id="setMilestoneTitle" class="modern-input" placeholder=" " required>
+                  <label for="setMilestoneTitle" class="modern-label">Milestone Title</label>
+                </div>
+                <div class="modern-form-group">
+                  <textarea id="setMilestoneDesc" class="modern-input" rows="4" placeholder=" " required></textarea>
+                  <label for="setMilestoneDesc" class="modern-label">Description & Requirements</label>
+                </div>
+
+                <button type="submit" class="btn primary">Set Milestone</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Tab Content: Approvals -->
+          <div class="tab-content" data-section="admin" data-tab="approvals">
+            <div class="card full-width">
+              <h3>Pending Milestone Approvals</h3>
+              <div id="pendingMilestones" class="milestone-list"></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- CONTRACTOR SECTION WITH SIDEBAR -->
+      <section id="contractor" class="section">
+        <div class="container mx-auto">
+          <div class="section-header mb-6">
+            <h2 class="text-3xl font-bold text-white"><i class="fas fa-hard-hat mr-2"></i> Contractor Dashboard</h2>
+          </div>
+
+          <!-- Tab Content: My Projects -->
+          <div class="tab-content active" data-section="contractor" data-tab="projects">
+            <div class="card full-width mb-6">
+              <h3>My Assigned Projects</h3>
+              <div id="contractorProjects" class="project-list"></div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Submit Milestone -->
+          <div class="tab-content" data-section="contractor" data-tab="milestone">
+            <div class="card full-width">
+              <h3>Submit Milestone</h3>
+              <form id="submitMilestoneForm">
+                <div class="modern-form-group">
+                  <select id="milestoneProjectId" class="modern-input" required>
+                    <option value="" disabled selected>Select Project</option>
+                  </select>
+                  <label for="milestoneProjectId" class="modern-label">Select Project</label>
+                </div>
+                <div class="modern-form-group" id="milestoneSelectContainer">
+                  <select id="milestoneId" class="modern-input" required>
+                    <option value="" disabled selected>Select Milestone</option>
+                  </select>
+                  <label for="milestoneId" class="modern-label">Select Milestone</label>
+                </div>
+
+                <div class="modern-form-group">
+                  <div class="file-upload-zone">
+                    <input type="file" id="proofHash" accept="image/*" required>
+                    <div class="upload-content">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      <p>Click or Drag to Upload Proof</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn primary" id="submitMilestoneBtn">Submit Milestone</button>
+              </form>
+            </div>
+            <div class="card full-width mt-6">
+              <h3>My Milestones</h3>
+              <div id="contractorMilestones" class="milestones-grid"></div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Request Material -->
+          <div class="tab-content" data-section="contractor" data-tab="material">
+            <div class="card full-width">
+              <h3>Log Material Delivery</h3>
+              <form id="logMaterialForm">
+                <div class="modern-form-group">
+                  <select id="materialProjectId" class="modern-input" required>
+                    <option value="" disabled selected>Select Project</option>
+                  </select>
+                  <label for="materialProjectId" class="modern-label">Select Project</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="text" id="materialName" class="modern-input" placeholder=" " required>
+                  <label for="materialName" class="modern-label">Material Name</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="number" id="materialQuantity" class="modern-input" placeholder=" " required>
+                  <label for="materialQuantity" class="modern-label">Quantity</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="file" id="materialProofImage" class="modern-input" accept="image/*" required>
+                  <label for="materialProofImage" class="modern-label">Upload Proof Image</label>
+                </div>
+                <button type="submit" class="btn primary">Log Material</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Tab Content: Register Labor -->
+          <div class="tab-content" data-section="contractor" data-tab="labor">
+            <div class="card full-width">
+              <h3>Register Labor</h3>
+              <form id="registerLaborForm">
+                <div class="modern-form-group">
+                  <select id="laborProjectId" class="modern-input" required>
+                    <option value="" disabled selected>Select Project</option>
+                  </select>
+                  <label for="laborProjectId" class="modern-label">Select Project</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="text" id="laborName" class="modern-input" placeholder=" " required>
+                  <label for="laborName" class="modern-label">Full Name</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="text" id="laborSkill" class="modern-input" placeholder=" " required>
+                  <label for="laborSkill" class="modern-label">Skill / Trade</label>
+                </div>
+                <button type="submit" class="btn primary">Register Labor</button>
+              </form>
+            </div>
+            <div class="card full-width mt-6">
+              <h3>Labor Registry</h3>
+              <div id="laborRegistry" class="labor-grid"></div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Mark Attendance -->
+          <div class="tab-content" data-section="contractor" data-tab="attendance">
+            <div class="card full-width">
+              <h3>Mark Attendance</h3>
+              <form id="attendanceForm">
+                <div class="modern-form-group">
+                  <select id="attendanceProjectId" class="modern-input" required>
+                    <option value="" disabled selected>Select Project</option>
+                  </select>
+                  <label for="attendanceProjectId" class="modern-label">Select Project</label>
+                </div>
+                <div class="modern-form-group">
+                  <select id="attendanceLaborName" class="modern-input" required>
+                    <option value="" disabled selected>Select Labor</option>
+                  </select>
+                  <label for="attendanceLaborName" class="modern-label">Select Labor</label>
+                </div>
+                <div class="modern-form-group">
+                  <input type="date" id="attendanceDate" class="modern-input" required>
+                  <label for="attendanceDate" class="modern-label">Date</label>
+                </div>
+                <div class="modern-form-group">
+                  <select id="attendanceStatus" class="modern-input" required>
+                    <option value="" disabled selected>Select Status</option>
+                    <option value="true">Present</option>
+                    <option value="false">Absent</option>
+                  </select>
+                  <label for="attendanceStatus" class="modern-label">Attendance Status</label>
+                </div>
+                <button type="submit" class="btn primary">Mark Attendance</button>
+              </form>
+            </div>
+            <div class="card full-width mt-6">
+              <h3>Attendance Records</h3>
+              <div id="attendanceRecords" class="attendance-grid"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PUBLIC SECTION (NO TABS) -->
+      <section id="public" class="section">
+        <div class="container mx-auto">
+          <div class="section-header flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-white"><i class="fas fa-globe mr-2"></i> Public Transparency</h2>
+            <button class="btn btn-verify" onclick="verifyChainIntegrity()"><i class="fas fa-shield-alt mr-2"></i>
+              Verify Chain</button>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <i class="fas fa-project-diagram mb-2 text-2xl text-purple-400"></i>
+              <div class="stat-number" id="totalProjects">0</div>
+              <div class="stat-label">Total Projects</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-tasks mb-2 text-2xl text-purple-400"></i>
+              <div class="stat-number" id="totalMilestones">0</div>
+              <div class="stat-label">Milestones</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-truck mb-2 text-2xl text-purple-400"></i>
+              <div class="stat-number" id="totalMaterials">0</div>
+              <div class="stat-label">Materials</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-users mb-2 text-2xl text-purple-400"></i>
+              <div class="stat-number" id="totalAttendance">0</div>
+              <div class="stat-label">Attendance</div>
+            </div>
+          </div>
+          <div class="card full-width mt-6">
+            <h3>Recent Transactions</h3>
+            <div class="transaction-filters">
+              <button class="filter-btn active" onclick="filterTransactions('all')">All</button>
+              <button class="filter-btn" onclick="filterTransactions('projects')">Projects</button>
+              <button class="filter-btn" onclick="filterTransactions('defined_milestones')">Defined Milestones</button>
+              <button class="filter-btn" onclick="filterTransactions('milestones')">Milestones</button>
+              <button class="filter-btn" onclick="filterTransactions('materials')">Materials</button>
+              <button class="filter-btn" onclick="filterTransactions('attendance')">Attendance</button>
+            </div>
+            <div id="publicTransactions" class="transactions-list"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Verification Modal -->
+  <div id="verificationModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeVerificationModal()">&times;</span>
+      <h2 id="verificationTitle"></h2>
+      <div id="verificationBody"></div>
+    </div>
+  </div>
+
+  <div id="status" class="status-bar"
+    style="position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 10px 20px; border-radius: 8px; display: none; z-index: 9999;">
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="hashing.js"></script>
+  <script src="firebase.js"></script>
+  <script src="authCheck.js"></script>
+  <script src="tabs.js"></script>
+  <script src="sharedFunctions.js"></script>
+  <script src="adminDashboard.js"></script>
+  <script src="contractorDashboard.js"></script>
+  <script src="publicDashboard.js"></script>
+  <script src="app.js"></script>
+
+</body>
+
+</html>

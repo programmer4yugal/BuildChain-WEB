@@ -82,9 +82,9 @@ const populateProjectSelectors = async (filterEmail = null) => {
       const selector = document.getElementById(selectorId);
       if (selector) {
         selector.innerHTML = '<option value="">Select Project</option>';
-        projects.forEach((project, index) => {
-          // Using index as ID based on creation order
-          selector.innerHTML += `<option value="${index}">Project: ${project.title}</option>`;
+        projects.forEach((project) => {
+          // Using project.id (Firestore ID) for robust linking
+          selector.innerHTML += `<option value="${project.id}">Project: ${project.title}</option>`;
         });
 
         // Restore selection if value exists

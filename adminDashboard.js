@@ -75,7 +75,8 @@ const loadAdminData = async () => {
             <h4>${milestone.description}</h4>
             <p><strong>Submitted by:</strong> ${milestone.from}</p>
             <p><strong>Project ID:</strong> ${milestone.projectId}</p>
-            <p><strong>Proof:</strong> <code class="hash-preview">${milestone.proofHash}</code></p>
+            <p><strong>Proof Picture:</strong></p>
+            <img src="${milestone.proofHash}" alt="Milestone Proof" style="width: 100%; max-width: 400px; border-radius: 8px; margin: 10px 0; border: 2px solid rgba(139, 92, 246, 0.3); cursor: pointer;" onclick="window.open('${milestone.proofHash}', '_blank')">
             <button class="btn primary" onclick="approveMilestone('${milestone.id}')">
               <i class="fas fa-check"></i> Approve & Chain
             </button>
@@ -226,7 +227,6 @@ document.getElementById("setMilestoneForm")?.addEventListener("submit", async (e
     const projectId = document.getElementById("setMilestoneProjectId").value;
     const title = document.getElementById("setMilestoneTitle").value;
     const description = document.getElementById("setMilestoneDesc").value;
-    const amount = document.getElementById("setMilestoneAmount").value;
 
     if (!projectId) {
       showStatus("Please select a project", "error");
@@ -239,7 +239,6 @@ document.getElementById("setMilestoneForm")?.addEventListener("submit", async (e
       projectId,
       title,
       description,
-      amount,
       status: 'defined',
       createdAt: new Date().toISOString(),
       from: sessionStorage.getItem('userEmail') || 'Admin'

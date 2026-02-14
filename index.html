@@ -4,346 +4,309 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BuildChain - Transparent Construction Management</title>
-  <link rel="stylesheet" href="style.css">
+  <title>BuildChain - Ultra-Modern Construction Management</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Ensure Tailwind doesn't conflict with Dashboard Custom CSS */
+    /* We scoped dashboard styles in style.css, but some resets might happen. */
+    /* Force body background to be transparent to let the pseudo-elements show */
+    body {
+      background-color: transparent !important;
+    }
+  </style>
 </head>
 
-<body>
-  <!-- Background Animation -->
-  <div class="bg-animation">
-    <div class="glow-orb orb-1"></div>
-    <div class="glow-orb orb-2"></div>
-    <div class="glow-orb orb-3"></div>
-  </div>
+<body class="text-white overflow-x-hidden relative">
 
-  <!-- Mobile Toggle -->
-  <input type="checkbox" id="mobile-menu-toggle">
-  <label for="mobile-menu-toggle" class="mobile-toggle-btn">
-    <i class="fas fa-bars"></i>
-  </label>
+  <!-- ===============================
+       LANDING PAGE CONTAINER
+       =============================== -->
+  <div id="landing-page">
 
-  <div class="app-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="brand-logo">
-        <i class="fas fa-cube"></i>
-        <span>BuildChain</span>
-      </div>
+    <!-- LP Sidebar (Navigation) -->
+    <!-- Added z-50 to keep it above other content -->
+    <button id="lp-sidebarToggle"
+      class="fixed top-6 left-6 z-50 md:hidden w-12 h-12 glass-card rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition"
+      onclick="document.getElementById('lp-sidebar').classList.toggle('-translate-x-full')">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
 
-      <nav class="nav-menu">
-        <a href="#" class="nav-link" onclick="showSection('home')">
-          <i class="fas fa-home"></i> <span>Home</span>
-        </a>
-        <a href="#" class="nav-link" onclick="showSection('admin')">
-          <i class="fas fa-user-shield"></i> <span>Admin</span>
-        </a>
-        <a href="#" class="nav-link" onclick="showSection('contractor')">
-          <i class="fas fa-hard-hat"></i> <span>Contractor</span>
-        </a>
-        <a href="#" class="nav-link" onclick="showSection('public')">
-          <i class="fas fa-globe"></i> <span>Public View</span>
-        </a>
-      </nav>
-
-      <!-- Auth / User Profile Area -->
-      <div class="auth-wrapper">
-        <!-- Not Logged In -->
-        <div id="authButtons" style="display: flex; flex-direction: column; gap: 10px;">
-          <a href="auth.html?mode=login" class="btn primary" style="width: 100%; justify-content: center;">
-            <i class="fas fa-sign-in-alt"></i> <span>Login</span>
-          </a>
-          <a href="auth.html?mode=register" class="btn"
-            style="width: 100%; justify-content: center; background: rgba(255,255,255,0.1);">
-            <i class="fas fa-user-plus"></i> <span>Register</span>
-          </a>
-        </div>
-
-        <!-- Logged In -->
-        <div id="userInfo" style="display: none;">
-          <div class="user-profile">
-            <div class="user-avatar">
-              <i class="fas fa-user"></i>
-            </div>
-            <div style="overflow: hidden;">
-              <div id="displayUserName"
-                style="font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                User</div>
-              <div id="displayUserRole" class="status-badge"
-                style="display: inline-block; padding: 2px 8px; font-size: 0.7rem; margin-top: 4px;">Role</div>
+    <aside id="lp-sidebar"
+      class="fixed left-0 top-0 h-screen w-80 z-40 glass-sidebar sidebar-transition -translate-x-full md:translate-x-0 overflow-hidden">
+      <div class="flex flex-col h-full p-8">
+        <!-- Logo -->
+        <div class="flex items-center gap-4 mb-12">
+          <div
+            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 flex items-center justify-center text-3xl shadow-2xl relative overflow-hidden"
+            style="box-shadow: 0 0 40px rgba(124, 58, 237, 0.6);">
+            <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+            <i class="fas fa-cube text-white relative z-10"></i>
+            <div
+              class="absolute inset-0 animate-pulse opacity-50 bg-gradient-to-tr from-violet-400/30 to-fuchsia-400/30">
             </div>
           </div>
-          <button onclick="handleLogout()" class="btn"
-            style="width: 100%; margin-top: 15px; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);">
-            <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+          <div>
+            <span
+              class="text-3xl font-black bg-gradient-to-r from-white via-purple-200 to-violet-200 bg-clip-text text-transparent"
+              style="text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);">BuildChain</span>
+            <p class="text-xs text-violet-400 font-bold mt-1 tracking-widest uppercase">Construction Management</p>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 space-y-6">
+          <div>
+            <div class="nav-section-title">Explore</div>
+            <div class="space-y-1">
+              <a href="#features"
+                class="group flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-300 hover:text-white hover:bg-white/8 transition-all duration-300 hover:translate-x-1">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/15 to-purple-500/15 border border-indigo-400/25 flex items-center justify-center group-hover:scale-110 group-hover:border-indigo-400/40 transition-all">
+                  <i class="fas fa-star text-indigo-400"></i>
+                </div>
+                <div>
+                  <div class="font-semibold text-sm">Features</div>
+                  <div class="text-xs text-gray-500 font-medium">Discover capabilities</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div class="nav-section-title">Transparency</div>
+            <div class="space-y-1">
+              <a href="#public-view" onclick="showPublicView(); return false;"
+                class="group flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-300 hover:text-white hover:bg-white/8 transition-all duration-300 hover:translate-x-1">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/15 to-cyan-500/15 border border-blue-400/25 flex items-center justify-center group-hover:scale-110 group-hover:border-blue-400/40 transition-all">
+                  <i class="fas fa-globe text-blue-400"></i>
+                </div>
+                <div>
+                  <div class="font-semibold text-sm">Public View</div>
+                  <div class="text-xs text-gray-500 font-medium">Blockchain transparency</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div class="nav-section-title">Access</div>
+            <div class="space-y-1">
+              <a href="#" onclick="goToAuth(); return false;"
+                class="group flex items-center gap-4 px-4 py-3.5 rounded-xl text-white hover:bg-white/10 transition-all duration-300 hover:translate-x-1">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-400/40 flex items-center justify-center group-hover:scale-110 transition-all shadow-lg shadow-violet-500/20">
+                  <i class="fas fa-sign-in-alt text-violet-300"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-sm tracking-wide">Signup/Login</div>
+                  <div class="text-xs text-violet-300 font-medium">Dashboard Access</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </nav>
+
+        <!-- CTA -->
+        <div class="space-y-4 pt-6 border-t border-white/10">
+          <button onclick="goToAuth()"
+            class="block w-full px-6 py-4 btn-primary text-white text-center font-bold rounded-xl hover:scale-[1.02] transition-all transform tracking-wide">
+            <span class="flex items-center justify-center gap-2">
+              <i class="fas fa-rocket"></i>
+              Start Management
+            </span>
           </button>
+          <p class="text-xs text-gray-400 text-center font-medium tracking-wide">Blockchain Secured • Real-time</p>
         </div>
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
+    <!-- LP Main Content -->
+    <div class="md:ml-80 transition-all duration-300">
 
-      <!-- Home Section -->
-      <section id="home" class="section active">
-        <div class="hero">
-          <h1>Transparent Construction.<br>On Blockchain.</h1>
-          <p>
-            Track projects, milestones, materials and attendance
-            with verifiable on-chain proof.
-          </p>
-
-          <!-- Auth Buttons / User Info are now in Sidebar, so we can remove them from Hero or keep them as call-to-action if desired. 
-           But the user asked for sidebar layout. Usually sidebar has the auth. 
-           I will remove them from Hero to make it cleaner, or just keep a "Get Started" button.
-           But to be safe and preserve functionality, I will just hide them or keep them minimal.
-           Wait, I already put them in the Sidebar. Having them duplicatively in Hero might be confusing. 
-           I'll remove the Auth Buttons and User Info from the Hero section. -->
-
-          <div style="margin-top: 40px; display: flex; gap: 20px; justify-content: center;">
-            <button onclick="showSection('admin')" class="btn primary">
-              <i class="fas fa-arrow-right"></i> Get Started
-            </button>
-          </div>
-
-          <div class="features">
-            <div class="feature-card">
-              <h3><i class="fas fa-gavel"></i> Project Governance</h3>
-              <p>Admin-controlled project assignment and budget tracking.</p>
+      <!-- Hero Section -->
+      <section class="min-h-screen flex items-center justify-center px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto text-center w-full">
+          <div class="text-box mx-auto max-w-4xl">
+            <div class="animate-fadeInUp" style="animation-delay: 0.1s;">
+              <div class="status-badge status-active mb-6">
+                <i class="fas fa-check-circle mr-2"></i>
+                Your construction projects — effortlessly organized
+              </div>
+              <h1
+                class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 leading-[1.1] px-2 tracking-tight">
+                Manage construction<br />
+                <span class="gradient-text"
+                  style="background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 30%, #7c3aed 60%, #ec4899 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">like
+                  never before</span>
+              </h1>
+              <p
+                class="text-base sm:text-lg md:text-xl text-gray-300 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-4 font-medium">
+                BuildChain organizes your projects, coordinates teams, and keeps everything on track with intelligent
+                blockchain-powered management.
+              </p>
             </div>
 
-            <div class="feature-card">
-              <h3><i class="fas fa-check-circle"></i> Milestone Verification</h3>
-              <p>Submit and approve milestones with blockchain proof.</p>
+            <div class="animate-fadeInUp flex flex-col sm:flex-row gap-4 justify-center mb-12 sm:mb-16 px-4"
+              style="animation-delay: 0.3s;">
+              <button onclick="enterDashboard()"
+                class="px-8 py-4 btn-primary text-white font-bold rounded-xl transition-all transform hover:scale-[1.03] inline-flex items-center justify-center gap-3 tracking-wide">
+                Get Started
+                <i class="fas fa-arrow-right"></i>
+              </button>
             </div>
 
-            <div class="feature-card">
-              <h3><i class="fas fa-truck"></i> Material Logs</h3>
-              <p>Track construction materials transparently and securely.</p>
-            </div>
-
-            <div class="feature-card">
-              <h3><i class="fas fa-users"></i> Labor Transparency</h3>
-              <p>On-chain attendance and workforce visibility.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- How It Works -->
-        <section class="workflow" style="padding: 80px 20px; text-align: center;">
-          <h2
-            style="margin-bottom: 50px; font-size: 2.5rem; background: linear-gradient(135deg, white, var(--primary-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            How It Works</h2>
-          <div class="steps" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;">
-            <div class="step"
-              style="background: var(--glass-card); padding: 30px 40px; border-radius: 24px; font-weight: 600; color: white; border: 1px solid var(--glass-border); backdrop-filter: blur(10px);">
-              1. Admin Creates Project</div>
-            <div class="step"
-              style="background: var(--glass-card); padding: 30px 40px; border-radius: 24px; font-weight: 600; color: white; border: 1px solid var(--glass-border); backdrop-filter: blur(10px);">
-              2. Contractor Submits Logs</div>
-            <div class="step"
-              style="background: var(--glass-card); padding: 30px 40px; border-radius: 24px; font-weight: 600; color: white; border: 1px solid var(--glass-border); backdrop-filter: blur(10px);">
-              3. Admin Approves Milestones</div>
-            <div class="step"
-              style="background: var(--glass-card); padding: 30px 40px; border-radius: 24px; font-weight: 600; color: white; border: 1px solid var(--glass-border); backdrop-filter: blur(10px);">
-              4. Public Verifies On-Chain</div>
-          </div>
-        </section>
-      </section>
-
-      <!-- Admin Section -->
-      <section id="admin" class="section">
-        <div class="container">
-          <div class="section-header"
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2><i class="fas fa-user-shield"></i> Admin Dashboard</h2>
-            <div class="wallet-info">
-              <!-- Wallet info or logout button will be injected here -->
-            </div>
-          </div>
-
-          <div class="dashboard-grid">
-            <div class="card">
-              <h3>Create New Project</h3>
-              <form id="createProjectForm">
-                <input type="text" id="projectTitle" placeholder="Project Title" required>
-                <input type="text" id="projectLocation" placeholder="Project Location" required>
-                <input type="number" id="projectBudget" placeholder="Budget (₹)" step="0.001" required>
-                <input type="email" id="contractorAddress" placeholder="Contractor Email Address" required>
-                <button type="submit" class="btn primary">Create Project</button>
-              </form>
-            </div>
-
-            <div class="card">
-              <h3>Set Project Milestone</h3>
-              <form id="setMilestoneForm">
-                <select id="setMilestoneProjectId" required>
-                  <option value="">Select Project</option>
-                </select>
-                <input type="text" id="setMilestoneTitle" placeholder="Milestone Title" required>
-                <textarea id="setMilestoneDesc" placeholder="Description & Requirements" required></textarea>
-                <input type="number" id="setMilestoneAmount" placeholder="Reward Amount (₹)" step="0.001" required>
-                <button type="submit" class="btn primary">Set Milestone</button>
-              </form>
-            </div>
-
-            <div class="card">
-              <h3>Pending Milestone Approvals</h3>
-              <div id="pendingMilestones" class="milestone-list"></div>
-            </div>
-          </div>
-
-          <div class="card full-width">
-            <h3>All Projects</h3>
-            <div id="adminProjectsList" class="projects-grid"></div>
-          </div>
-
-          <div class="card full-width">
-            <h3>Project Analytics</h3>
-            <div style="position: relative; height: 300px;">
-              <canvas id="adminChart"></canvas>
+            <div class="mt-12 grid grid-cols-3 gap-6 sm:gap-10 max-w-3xl mx-auto">
+              <div class="text-center glass-card py-6 px-4">
+                <div class="text-4xl font-black text-white mb-3" id="heroTotalBlocks">-</div>
+                <div class="text-sm text-gray-400 font-semibold uppercase tracking-wider">Blockchain Blocks</div>
+              </div>
+              <div class="text-center glass-card py-6 px-4">
+                <div class="text-4xl font-black text-white mb-3" id="heroTotalProjects">-</div>
+                <div class="text-sm text-gray-400 font-semibold uppercase tracking-wider">Projects Tracked</div>
+              </div>
+              <div class="text-center glass-card py-6 px-4">
+                <div class="text-3xl sm:text-4xl font-black text-white mb-3">100%</div>
+                <div class="text-xs sm:text-sm text-gray-400 font-semibold uppercase tracking-wider">Chain Integrity</div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Contractor Section -->
-      <section id="contractor" class="section">
-        <div class="container">
-          <div class="section-header"
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2><i class="fas fa-hard-hat"></i> Contractor Dashboard</h2>
+      <!-- Features Section -->
+      <section id="features" class="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center mb-12 sm:mb-20">
+            <div class="text-box-light inline-block">
+              <h2 class="text-3xl sm:text-4xl md:text-5xl font-black mb-4 tracking-tight">Deep Features Breakdown</h2>
+            </div>
           </div>
 
-          <div class="card full-width" style="margin-bottom: 30px;">
-            <h3>My Assigned Projects</h3>
-            <div id="contractorProjects" class="project-list"></div>
-          </div>
-
-          <div class="dashboard-grid">
-            <div class="card">
-              <h3>Submit Milestone</h3>
-              <form id="submitMilestoneForm">
-                <select id="milestoneProjectId" required>
-                  <option value="">Select Project</option>
-                </select>
-                <div id="milestoneSelectContainer" style="margin: 10px 0;">
-                  <select id="milestoneId" required
-                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: white;">
-                    <option value="">Select Milestone to Submit</option>
-                  </select>
+          <div class="space-y-16 sm:space-y-24 lg:space-y-32">
+            <!-- Feature 1 -->
+            <div class="grid md:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+              <div class="text-box-light">
+                <div class="status-badge status-active mb-5">
+                  <i class="fas fa-brain mr-2"></i> Smart Management
                 </div>
-                <input type="text" id="proofHash" placeholder="Proof Hash (IPFS/Document Hash)" required>
-                <button type="submit" class="btn primary">Submit Milestone</button>
-              </form>
+                <h3 class="text-2xl sm:text-3xl md:text-4xl font-black mb-5 sm:mb-6 tracking-tight">The brain of your
+                  project</h3>
+                <p class="text-gray-300 mb-6 sm:mb-8 text-base sm:text-lg font-medium">BuildChain automatically
+                  organizes your construction workflow.</p>
+                <div class="space-y-5">
+                  <div class="flex items-start gap-4">
+                    <i class="fas fa-check text-indigo-400 mt-1"></i>
+                    <div class="font-medium">Arranges tasks by priority</div>
+                  </div>
+                  <div class="flex items-start gap-4">
+                    <i class="fas fa-check text-indigo-400 mt-1"></i>
+                    <div class="font-medium">Coordinates team schedules</div>
+                  </div>
+                </div>
+              </div>
+              <div class="glass-card rounded-3xl p-3 hover:scale-[1.02] transition-all duration-300">
+                <img src="the_brain.png" alt="The brain of your project" class="w-full rounded-2xl shadow-2xl">
+              </div>
             </div>
 
-            <div class="card">
-              <h3>Log Material Delivery</h3>
-              <form id="logMaterialForm">
-                <select id="materialProjectId" required>
-                  <option value="">Select Project</option>
-                </select>
-                <input type="text" id="materialName" placeholder="Material Name" required>
-                <input type="number" id="materialQuantity" placeholder="Quantity" required>
-                <input type="text" id="materialProofHash" placeholder="Delivery Proof Hash" required>
-                <button type="submit" class="btn primary">Log Material</button>
-              </form>
-            </div>
-          </div>
-
-          <div class="card full-width">
-            <h3>My Milestones</h3>
-            <div id="contractorMilestones" class="milestones-grid"></div>
-          </div>
-
-          <div class="dashboard-grid">
-            <div class="card">
-              <h3>Register Labor</h3>
-              <form id="registerLaborForm">
-                <select id="laborProjectId" required>
-                  <option value="">Select Project</option>
-                </select>
-                <input type="text" id="laborName" placeholder="Labor Name" required>
-                <input type="text" id="laborSkill" placeholder="Skill/Trade" required>
-                <button type="submit" class="btn primary">Register Labor</button>
-              </form>
+            <!-- Feature 2 -->
+            <div class="grid md:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+              <div class="glass-card rounded-3xl p-3 order-2 md:order-1 hover:scale-[1.02] transition-all duration-300">
+                <img src="work_with_confidence.jpeg" alt="Work with confidence" class="w-full rounded-2xl shadow-2xl">
+              </div>
+              <div class="text-box-light order-1 md:order-2">
+                <div class="status-badge status-active mb-5">
+                  <i class="fas fa-shield-alt mr-2"></i> Blockchain Security
+                </div>
+                <h3 class="text-2xl sm:text-3xl md:text-4xl font-black mb-5 sm:mb-6 tracking-tight">Work with confidence
+                </h3>
+                <p class="text-gray-300 mb-6 sm:mb-8 text-base sm:text-lg font-medium">Immutable project records and
+                  secure authentication.</p>
+              </div>
             </div>
 
-            <div class="card">
-              <h3>Mark Attendance</h3>
-              <form id="attendanceForm">
-                <select id="attendanceProjectId" required>
-                  <option value="">Select Project</option>
-                </select>
-                <select id="attendanceLaborName" required>
-                  <option value="">Select Labor</option>
-                </select>
-                <input type="date" id="attendanceDate" required>
-                <select id="attendanceStatus" required>
-                  <option value="">Attendance Status</option>
-                  <option value="true">Present</option>
-                  <option value="false">Absent</option>
-                </select>
-                <button type="submit" class="btn primary">Mark Attendance</button>
-              </form>
+            <!-- Feature 3 -->
+            <div class="grid md:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+              <div class="text-box-light">
+                <div class="status-badge status-active mb-5">
+                  <i class="fas fa-chart-line mr-2"></i> Analytics
+                </div>
+                <h3 class="text-2xl sm:text-3xl md:text-4xl font-black mb-5 sm:mb-6 tracking-tight">Learn how your
+                  projects perform</h3>
+                <p class="text-gray-300 mb-6 sm:mb-8 text-base sm:text-lg font-medium">Track your progress and
+                  productivity with precision.</p>
+              </div>
+              <div class="glass-card rounded-3xl p-3 hover:scale-[1.02] transition-all duration-300">
+                <img src="learn_how_project_perform.jpeg" alt="Analytics" class="w-full rounded-2xl shadow-2xl">
+              </div>
             </div>
-          </div>
-
-          <div class="card full-width">
-            <h3>Labor Registry</h3>
-            <div id="laborRegistry" class="labor-grid"></div>
-          </div>
-
-          <div class="card full-width">
-            <h3>Attendance Records</h3>
-            <div id="attendanceRecords" class="attendance-grid"></div>
           </div>
         </div>
       </section>
 
-
-
-      <!-- Public Transparency Section -->
-      <section id="public" class="section">
-        <div class="container">
-          <div class="section-header"
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2><i class="fas fa-globe"></i> Public Transparency Dashboard</h2>
+      <!-- Public View Section -->
+      <section id="public-view" class="min-h-screen px-4 sm:px-6 py-20" style="display: none;">
+        <div class="max-w-7xl mx-auto">
+          <div class="section-header flex justify-between items-center mb-8">
+            <div>
+              <button onclick="showSection('home')" class="text-gray-400 hover:text-white mb-4 inline-flex items-center gap-2 transition">
+                <i class="fas fa-arrow-left"></i> Back to Home
+              </button>
+              <h2 class="text-3xl sm:text-4xl font-bold text-white">
+                <i class="fas fa-globe mr-3"></i> Public Transparency
+              </h2>
+              <p class="text-gray-400 mt-2">View all blockchain-verified construction activities</p>
+            </div>
             <button class="btn btn-verify" onclick="verifyChainIntegrity()">
-              <i class="fas fa-shield-alt"></i> Verify Chain
+              <i class="fas fa-shield-alt mr-2"></i> Verify Chain
             </button>
           </div>
-
-          <div class="stats-grid">
+          
+          <div class="stats-grid mb-8">
             <div class="stat-card">
-              <i class="fas fa-project-diagram"></i>
+              <i class="fas fa-project-diagram mb-2 text-2xl text-purple-400"></i>
               <div class="stat-number" id="totalProjects">0</div>
               <div class="stat-label">Total Projects</div>
             </div>
             <div class="stat-card">
-              <i class="fas fa-tasks"></i>
+              <i class="fas fa-tasks mb-2 text-2xl text-purple-400"></i>
               <div class="stat-number" id="totalMilestones">0</div>
-              <div class="stat-label">Milestones Completed</div>
+              <div class="stat-label">Milestones</div>
             </div>
             <div class="stat-card">
-              <i class="fas fa-truck"></i>
+              <i class="fas fa-truck mb-2 text-2xl text-purple-400"></i>
               <div class="stat-number" id="totalMaterials">0</div>
-              <div class="stat-label">Material Deliveries</div>
+              <div class="stat-label">Materials</div>
             </div>
             <div class="stat-card">
-              <i class="fas fa-users"></i>
+              <i class="fas fa-users mb-2 text-2xl text-purple-400"></i>
               <div class="stat-number" id="totalAttendance">0</div>
-              <div class="stat-label">Attendance Records</div>
+              <div class="stat-label">Attendance</div>
             </div>
           </div>
-
+          
           <div class="card full-width">
             <h3>Recent Transactions</h3>
             <div class="transaction-filters">
               <button class="filter-btn active" onclick="filterTransactions('all')">All</button>
               <button class="filter-btn" onclick="filterTransactions('projects')">Projects</button>
+              <button class="filter-btn" onclick="filterTransactions('defined_milestones')">Defined Milestones</button>
               <button class="filter-btn" onclick="filterTransactions('milestones')">Milestones</button>
               <button class="filter-btn" onclick="filterTransactions('materials')">Materials</button>
               <button class="filter-btn" onclick="filterTransactions('attendance')">Attendance</button>
@@ -353,36 +316,50 @@
         </div>
       </section>
 
-      <!-- Verification Result Modal -->
-      <div id="verificationModal" class="modal">
-        <div class="modal-content">
-          <span class="modal-close" onclick="closeVerificationModal()">&times;</span>
-          <h2 id="verificationTitle"></h2>
-          <div id="verificationBody"></div>
-        </div>
-      </div>
-
-      <footer>
+      <!-- Footer -->
+      <footer class="text-center py-10 text-gray-500 border-t border-white/5 mt-20">
         <p>© 2026 BuildChain. All rights reserved.</p>
       </footer>
 
-      <div id="status" class="status-bar"></div>
+    </div> <!-- End LP Main Content -->
+  </div> <!-- End Landing Page -->
 
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-      <script src="env.js"></script>
-      <script src="hashing.js"></script> <!-- Blockchain Simulation Logic -->
-      <script src="firebase.js"></script>
-      <script src="authCheck.js"></script>
-      <script src="sharedFunctions.js"></script>
-      <script src="adminDashboard.js"></script>
-      <script src="contractorDashboard.js"></script>
 
-      <script src="publicDashboard.js"></script>
-      <script src="app.js"></script>
+  <!-- ===============================
+       APP CONTAINER (DASHBOARD)
+       =============================== -->
+  <!-- ===============================
+       APP CONTAINER (MOVED TO dashboard.html)
+       =============================== -->
+  <!-- App content removed for separation. See dashboard.html -->
+
+  <!-- Verification Modal -->
+  <div id="verificationModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeVerificationModal()">&times;</span>
+      <h2 id="verificationTitle"></h2>
+      <div id="verificationBody"></div>
+    </div>
+  </div>
+
+  <div id="status" class="status-bar"
+    style="position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 10px 20px; border-radius: 8px; display: none; z-index: 9999;">
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="hashing.js"></script>
+  <script src="firebase.js"></script>
+  <script src="authCheck.js"></script>
+  <script src="sharedFunctions.js"></script>
+  <script src="adminDashboard.js"></script>
+  <script src="contractorDashboard.js"></script>
+  <script src="publicDashboard.js"></script>
+  <script src="app.js"></script>
+
 </body>
 
 </html>

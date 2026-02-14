@@ -1,100 +1,201 @@
-/* Midnight Purple Auth Theme */
-:root {
-    --bg-deep: #0a0e1a;
-    --bg-gradient: radial-gradient(circle at 50% 0%, #1a1f3a 0%, #0f1420 60%, #0a0e1a 100%);
-    --primary-purple: #8b5cf6;
-    --glass-card: rgba(30, 35, 60, 0.5);
-    --glass-border: rgba(139, 92, 246, 0.2);
-    --text-primary: #ffffff;
-    --text-secondary: #9ca3af;
-    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
-}
+/* Auth Page Styling - Inherits from style.css */
+/* We don't need to redefine variables as they are in style.css, but auth.html links both. */
 
 body {
+    margin: 0;
+    padding: 0;
     font-family: 'Inter', sans-serif;
-    background: var(--bg-deep);
-    background-image: var(--bg-gradient);
-    color: var(--text-primary);
+    /* Use the global background from style.css or redefine it here if standalone */
+    background: #0a0e1a;
+    background-image:
+        radial-gradient(circle at 50% 0%, #1a1f3a 0%, #0f1420 60%, #0a0e1a 100%);
+    color: white;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0;
-}
-
-.auth-container {
-    background: var(--glass-card);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 40px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-    text-align: center;
     position: relative;
     overflow: hidden;
 }
 
-.auth-container::before {
+/* Background Effects (Matching Landing Page) */
+body::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-purple), #ec4899);
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(90deg, transparent 0%, rgba(138, 77, 255, 0.08) 50%, transparent 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 100px, rgba(138, 77, 255, 0.06) 100px, rgba(138, 77, 255, 0.06) 101px),
+        margin: 0;
 }
 
-.auth-header h2 {
+.auth-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.auth-box {
+    background: rgba(20, 25, 45, 0.7);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(138, 77, 255, 0.2);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px rgba(138, 77, 255, 0.1);
+    text-align: center;
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+h2 {
     font-size: 2rem;
-    margin-bottom: 10px;
-    color: white;
+    font-weight: 800;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #fff 30%, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 
-.auth-header p {
-    color: var(--text-secondary);
-    margin-bottom: 30px;
+h2 i {
+    color: #8b5cf6;
+    -webkit-text-fill-color: #8b5cf6;
+    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
 }
 
 .auth-tabs {
     display: flex;
-    margin-bottom: 30px;
     background: rgba(0, 0, 0, 0.3);
-    padding: 5px;
+    padding: 4px;
     border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.tab-btn,
 .auth-tab {
     flex: 1;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.3s;
+    padding: 12px;
     text-align: center;
+    cursor: pointer;
+    border-radius: 10px;
+    color: #9ca3af;
+    font-weight: 600;
+    transition: all 0.3s;
 }
 
-.tab-btn.active,
 .auth-tab.active {
-    background: var(--primary-purple);
+    background: #8b5cf6;
     color: white;
-    box-shadow: var(--shadow-glow);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
 }
 
-/* Form Visibility Logic */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group label i {
+    color: #8b5cf6;
+    width: 20px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(138, 77, 255, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+}
+
+.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
+}
+
+.back-link {
+    margin-top: 25px;
+}
+
+.back-link a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-link a:hover {
+    color: white;
+}
+
+/* Form Switching Animation */
 .auth-form {
     display: none;
+    animation: fadeIn 0.4s ease;
 }
 
 .auth-form.active {
     display: block;
-    animation: fadeIn 0.4s ease-out;
 }
 
 @keyframes fadeIn {
@@ -109,113 +210,22 @@ body {
     }
 }
 
-.form-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-input,
-select {
-    width: 100%;
-    padding: 12px 15px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    color: white;
-    margin-bottom: 10px;
-    box-sizing: border-box;
-    /* Fix width overflow */
-}
-
-input:focus,
-select:focus {
-    outline: none;
-    border-color: var(--primary-purple);
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
-}
-
-.btn,
-.auth-btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 50px;
-    background: linear-gradient(135deg, var(--primary-purple), #ec4899);
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.3s;
-    box-shadow: var(--shadow-glow);
-    margin-top: 10px;
-}
-
-.btn:hover,
-.auth-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.4);
-}
-
-.message {
-    margin-top: 20px;
-    font-size: 0.9rem;
-    min-height: 20px;
-}
-
-.success {
-    color: #34d399;
-}
-
-.error {
-    color: #f87171;
-}
-
 .auth-message {
-    display: none;
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 15px;
     font-size: 0.9rem;
-}
-
-.auth-message.show {
-    display: block;
+    display: none;
 }
 
 .auth-message.success {
     background: rgba(16, 185, 129, 0.2);
     color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.4);
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .auth-message.error {
     background: rgba(239, 68, 68, 0.2);
     color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.4);
-}
-
-.back-link {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.back-link a {
-    color: var(--text-secondary);
-    /* Better contrast */
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-.back-link a:hover {
-    color: var(--primary-purple);
-    text-decoration: none;
-    text-shadow: var(--shadow-glow);
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }

@@ -4,26 +4,78 @@
 document.getElementById("submitMilestoneForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  const submitBtn = document.getElementById("submitMilestoneBtn");
+
+  // Disable button to prevent double submission
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  }
+
   try {
     const projectId = document.getElementById("milestoneProjectId").value;
     const milestoneSelect = document.getElementById("milestoneId");
     const definedMilestoneId = milestoneSelect.value;
-    const proofHash = document.getElementById("proofHash").value;
+    const proofFileInput = document.getElementById("proofHash");
 
     if (!definedMilestoneId) {
       showStatus("Please select a milestone", "error");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Milestone';
+      }
       return;
     }
 
+    // Check if file is selected
+    if (!proofFileInput.files || !proofFileInput.files[0]) {
+      showStatus("Please upload a proof picture", "error");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Milestone';
+      }
+      return;
+    }
+
+    // Convert image to base64
+    const file = proofFileInput.files[0];
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showStatus("Please upload a valid image file", "error");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Milestone';
+      }
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showStatus("Image size must be less than 5MB", "error");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Milestone';
+      }
+      return;
+    }
+
+    showStatus("Processing image...", "info");
+
+    const proofHash = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject(new Error("Failed to read image"));
+      reader.readAsDataURL(file);
+    });
+
     // Get the title from the selected option text
-    // Format: "Title (Amount ₹)" -> Just get Title? Or keep as is. 
-    // The previous code used the full text. I'll keep it simple.
-    const milestoneTitle = milestoneSelect.options[milestoneSelect.selectedIndex].text.split(' (')[0];
+    const milestoneTitle = milestoneSelect.options[milestoneSelect.selectedIndex].text.split(' - ')[0];
 
     showStatus("Submitting milestone for approval...", "info");
 
     const submissionData = {
-      projectId: parseInt(projectId),
+      projectId: projectId,
       definedMilestoneId,
       description: milestoneTitle,
       proofHash,
@@ -32,19 +84,51 @@ document.getElementById("submitMilestoneForm")?.addEventListener("submit", async
       from: sessionStorage.getItem('userEmail') || 'Contractor'
     };
 
-    // Save to off-chain buffer for approval
-    await db.collection('milestone_submissions').add(submissionData);
+    console.log('Submitting milestone with data:', {
+      projectId: submissionData.projectId,
+      from: submissionData.from,
+      status: submissionData.status,
+      imageSize: proofHash.length
+    });
 
-    showStatus("Milestone submitted for approval!", "success");
+    // Save to off-chain buffer for approval
+    const docRef = await db.collection('milestone_submissions').add(submissionData);
+    console.log('Milestone saved with ID:', docRef.id);
+
+    showStatus("✓ Milestone submitted! Scroll down to see it in 'My Milestones' list below.", "success");
+
+    // Wait a moment for Firebase to propagate, then reload
+    setTimeout(() => {
+      loadContractorMilestones();
+      console.log('Milestones reloaded after submission');
+
+      // Scroll to milestones section
+      const milestonesSection = document.getElementById('contractorMilestones');
+      if (milestonesSection) {
+        milestonesSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 500);
+
     document.getElementById("submitMilestoneForm").reset();
 
-    // Refresh my milestones
-    loadContractorMilestones();
+    // Re-enable button
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Submit Milestone';
+    }
     // No need to loadPublicData immediately as it's not on chain yet
   } catch (error) {
     console.error('Submit milestone error:', error);
     showStatus(`Error: ${error.message}`, "error");
+
+    // Re-enable button on error
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Submit Milestone';
+    }
   }
+
+  return false;
 });
 
 // Event Listener: When Milestone Project changes, load defined milestones
@@ -69,13 +153,14 @@ async function populateDefinedMilestones(projectId) {
 
     // Filter by project and status (if applicable)
     // Assuming defined_milestones store projectId as string or number matching selection
-    const projectMilestones = defined.filter(m => m.projectId.toString() === projectId.toString());
+    const projectMilestones = defined.filter(m => m.projectId === projectId);
 
     select.innerHTML = '<option value="">Select Milestone to Submit</option>';
 
     projectMilestones.forEach(m => {
-      // Show Title and Amount
-      select.innerHTML += `<option value="${m.id || m.hash}">${m.title} (${m.amount} ₹)</option>`;
+      // Show Title and Description
+      const displayText = m.description ? `${m.title} - ${m.description}` : m.title;
+      select.innerHTML += `<option value="${m.id || m.hash}">${displayText}</option>`;
     });
 
     if (projectMilestones.length === 0) {
@@ -95,12 +180,42 @@ document.getElementById("logMaterialForm")?.addEventListener("submit", async (e)
     const projectId = document.getElementById("materialProjectId").value;
     const materialName = document.getElementById("materialName").value;
     const quantity = document.getElementById("materialQuantity").value;
-    const proofHash = document.getElementById("materialProofHash").value;
+    const proofFileInput = document.getElementById("materialProofImage");
+
+    // Check if file is selected
+    if (!proofFileInput.files || !proofFileInput.files[0]) {
+      showStatus("Please upload a proof image", "error");
+      return;
+    }
+
+    // Convert image to base64
+    const file = proofFileInput.files[0];
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showStatus("Please upload a valid image file", "error");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showStatus("Image size must be less than 5MB", "error");
+      return;
+    }
+
+    showStatus("Processing image...", "info");
+
+    const proofHash = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject(new Error("Failed to read image"));
+      reader.readAsDataURL(file);
+    });
 
     showStatus("Logging material delivery...", "info");
 
     const materialData = {
-      projectId: parseInt(projectId),
+      projectId: projectId,
       material: materialName,
       quantity: parseInt(quantity),
       proofHash,
@@ -138,7 +253,7 @@ document.getElementById("registerLaborForm")?.addEventListener("submit", async (
     showStatus("Registering labor...", "info");
 
     const laborData = {
-      projectId: parseInt(projectId),
+      projectId: projectId,
       name,
       skill,
       registeredBy: sessionStorage.getItem('userEmail') || 'Contractor'
@@ -172,7 +287,7 @@ document.getElementById("attendanceForm")?.addEventListener("submit", async (e) 
     showStatus("Marking attendance...", "info");
 
     const attendanceData = {
-      projectId: parseInt(projectId),
+      projectId: projectId,
       laborName,
       date,
       present,
@@ -232,23 +347,36 @@ const loadContractorData = async () => {
   try {
     await populateProjectSelectors();
 
+    const contractorEmail = sessionStorage.getItem('userEmail') || sessionStorage.getItem('userId');
+    console.log('Loading projects for contractor:', contractorEmail);
+
     const projects = await getCollectionData('projects');
+    console.log('Total projects loaded:', projects.length);
+
     const contractorProjects = document.getElementById('contractorProjects');
 
     if (contractorProjects) {
       contractorProjects.innerHTML = '';
-      projects.forEach(project => {
-        contractorProjects.innerHTML += `
-          <div class="project-item">
-            <h4>Project: ${project.title}</h4>
-            <p><strong>Budget:</strong> ${project.budget} ₹</p>
-            <p><strong>Status:</strong> <span class="status-badge pending">In Progress</span></p>
+      
+      if (projects.length === 0) {
+        contractorProjects.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #64748b;">
+            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+            <p style="font-size: 1.1rem; margin-bottom: 10px;">No projects assigned yet</p>
+            <p style="font-size: 0.9rem;">Projects assigned to <strong>${contractorEmail}</strong> will appear here.</p>
           </div>
         `;
-      });
-
-      if (projects.length === 0) {
-        contractorProjects.innerHTML = '<p>No assigned projects</p>';
+      } else {
+        projects.forEach(project => {
+          contractorProjects.innerHTML += `
+            <div class="project-item">
+              <h4>Project: ${project.title}</h4>
+              <p><strong>Location:</strong> ${project.location || 'N/A'}</p>
+              <p><strong>Budget:</strong> ${project.budget} ₹</p>
+              <p><strong>Status:</strong> <span class="status-badge pending">In Progress</span></p>
+            </div>
+          `;
+        });
       }
     }
 
@@ -258,21 +386,37 @@ const loadContractorData = async () => {
     loadContractorMilestones();
   } catch (error) {
     console.error('Error loading contractor data:', error);
+    const contractorProjects = document.getElementById('contractorProjects');
+    if (contractorProjects) {
+      contractorProjects.innerHTML = `
+        <div style="text-align: center; padding: 20px; color: #ef4444;">
+          <i class="fas fa-exclamation-circle"></i> Error loading projects: ${error.message}
+        </div>
+      `;
+    }
   }
 };
 
 // Load Contractor Milestones
 const loadContractorMilestones = async () => {
+  const container = document.getElementById('contractorMilestones');
+
+  if (container) {
+    container.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Loading milestones...</div>';
+  }
+
   try {
     // Fetch from submissions buffer
     const milestones = await getCollectionData('milestone_submissions');
-    const container = document.getElementById('contractorMilestones');
     const userEmail = sessionStorage.getItem('userEmail') || 'Contractor';
+
+    console.log('Loading milestones. Total count:', milestones.length, 'User:', userEmail);
 
     if (container) {
       container.innerHTML = '';
       // Filter by current user
       const myMilestones = milestones.filter(m => m.from === userEmail);
+      console.log('My milestones count:', myMilestones.length);
 
       // Sort: Pending first, then Approved
       myMilestones.sort((a, b) => {
@@ -293,18 +437,23 @@ const loadContractorMilestones = async () => {
             <h4>${m.description}</h4>
             <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${statusText}</span></p>
             <p><strong>Project ID:</strong> ${m.projectId}</p>
-            <p><strong>Proof:</strong> <code class="hash-preview">${m.proofHash}</code></p>
+            <p><strong>Proof Picture:</strong></p>
+            <img src="${m.proofHash}" alt="Milestone Proof" style="width: 100%; max-width: 400px; border-radius: 8px; margin-top: 10px; border: 2px solid rgba(139, 92, 246, 0.3);" onclick="window.open('${m.proofHash}', '_blank')">
             ${m.txHash ? `<p><strong>Tx:</strong> <span class="transaction-hash">${m.txHash.substring(0, 10)}...</span></p>` : ''}
           </div>
         `;
       });
 
       if (myMilestones.length === 0) {
-        container.innerHTML = '<p>No submitted milestones found.</p>';
+        container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">No submitted milestones found. Submit your first milestone above!</p>';
       }
     }
   } catch (error) {
     console.error('Error loading contractor milestones:', error);
+    const container = document.getElementById('contractorMilestones');
+    if (container) {
+      container.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 20px;"><i class="fas fa-exclamation-circle"></i> Error loading milestones. Please refresh the page.</p>';
+    }
   }
 };
 

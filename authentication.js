@@ -72,9 +72,9 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     sessionStorage.setItem('userId', name);
     sessionStorage.setItem('userEmail', email);
 
-    // Redirect to main page after 2 seconds
+    // Redirect to dashboard after 2 seconds
     setTimeout(() => {
-      window.location.href = 'index.html';
+      window.location.href = 'dashboard.html';
     }, 2000);
 
   } catch (error) {
@@ -94,55 +94,53 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 });
 
 // Login Form Handler
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+  loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    
+    console.log('Login form submitted');
+    
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
 
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-
-  try {
-    showMessage('Logging in...', 'success');
-
-    // Sign in with Firebase Auth
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    const user = userCredential.user;
-
-    // Get user data from Firestore
-    const userDoc = await db.collection('users').doc(user.uid).get();
-
-    if (userDoc.exists) {
-      const userData = userDoc.data();
-
-      // Store user data in sessionStorage
-      sessionStorage.setItem('userRole', userData.role);
-      sessionStorage.setItem('userId', userData.name);
-      sessionStorage.setItem('userEmail', userData.email);
-
-      showMessage('Login successful! Redirecting...', 'success');
-
-      // Redirect to main page after 1 second
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1000);
-    } else {
-      showMessage('User data not found. Please register again.', 'error');
+    if (!email || !password) {
+      showMessage('Please fill in all fields', 'error');
+      return;
     }
 
-  } catch (error) {
-    console.error('Login error:', error);
-    let errorMessage = 'Login failed. Please try again.';
+    try {
+      showMessage('Logging in...', 'success');
+      
+      const userCredential = await window.auth.signInWithEmailAndPassword(email, password);
+      const user = userCredential.user;
 
-    if (error.code === 'auth/user-not-found') {
-      errorMessage = 'No account found with this email. Please register first.';
-    } else if (error.code === 'auth/wrong-password') {
-      errorMessage = 'Incorrect password. Please try again.';
-    } else if (error.code === 'auth/invalid-email') {
-      errorMessage = 'Invalid email address.';
+      const userDoc = await window.db.collection('users').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+
+        sessionStorage.setItem('userRole', userData.role);
+        sessionStorage.setItem('userId', userData.name);
+        sessionStorage.setItem('userEmail', userData.email);
+
+        showMessage('Login successful!', 'success');
+        
+        // Force redirect with login flag
+        setTimeout(() => {
+          window.location.replace('dashboard.html?fromLogin=true');
+        }, 500);
+      } else {
+        showMessage('User data not found', 'error');
+      }
+
+    } catch (error) {
+      console.error('Login error:', error);
+      showMessage(error.message || 'Login failed', 'error');
     }
-
-    showMessage(errorMessage, 'error');
-  }
-});
+  });
+}
 
 // Check URL parameters for tab switching
 window.addEventListener('DOMContentLoaded', () => {
