@@ -247,7 +247,7 @@ window.verifyChainIntegrity = async () => {
         <h4 style="margin-bottom: 10px; color: #a5b4fc;">Verified Block Breakdown</h4>
         ${breakdownHTML}
         <p style="text-align: center; margin-top: 20px; color: #10b981;">
-          Unified Chain is unbroken and immutable!
+          ✅ All blocks verified - Blockchain integrity maintained!
         </p>
         `
       );
